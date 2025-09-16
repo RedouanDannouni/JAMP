@@ -1,82 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthSession } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { generateLesson } from '@/lib/azure-openai';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getAuthSession();
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Niet geautoriseerd' },
+        { status: 401 }
+      );
+    }
+
     const { learningGoal } = await request.json();
-    const startTime = Date.now();
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!learningGoal || !learningGoal.id || !learningGoal.title) {
+      return NextResponse.json(
+        { error: 'Ongeldig leerdoel' },
+        { status: 400 }
+      );
+    }
 
-    // Mock lesson generation
-    const mockLesson = {
-      lessonTitle: `Les: ${learningGoal.title}`,
-      lessonOutline: `
-**Leerdoel:** ${learningGoal.title}
-
-**Tijdsduur:** 50 minuten
-
-**Lesopbouw:**
-
-1. **Introductie (10 min)**
-   - Welkom en agenda
-   - Activeren voorkennis
-   - Uitleg leerdoel
-
-2. **Instructie (15 min)**
-   - Theoretische uitleg
-   - Voorbeelden en demonstraties
-   - Interactieve vragen
-
-3. **Verwerking (20 min)**
-   - Praktische oefeningen
-   - Samenwerking in groepjes
-   - Begeleiding door docent
-
-4. **Afsluiting (5 min)**
-   - Samenvatting hoofdpunten
-   - Evaluatie leerdoel
-   - Preview volgende les
-
-**Benodigdheden:**
-- Whiteboard/smartboard
-- Werkbladen
-- Eventueel digitale hulpmiddelen
-
-**Differentiatie:**
-- Extra uitdaging voor snelle leerlingen
-- Ondersteuning voor leerlingen die meer tijd nodig hebben
-      `,
-      activities: [
-        "Brainstorm activiteit: Leerlingen delen hun voorkennis over het onderwerp in tweetallen",
-        "Interactieve presentatie met vragen en antwoorden om de theorie uit te leggen",
-        "Praktische oefening waarbij leerlingen in groepjes van 3-4 aan de slag gaan met het geleerde",
-        "Reflectie ronde waarin elke groep hun bevindingen deelt met de klas"
-      ]
-    };
+    // Generate lesson using Azure OpenAI
+    const lessonData = await generateLesson({ learningGoal });
 
     // Log the generation
     await supabase.from('logs').insert([{
       goal_id: learningGoal.id,
       timestamp: new Date().toISOString(),
       status: 'success',
-      raw_output: JSON.stringify(mockLesson)
+      raw_output: JSON.stringify(lessonData)
     }]);
 
-    return NextResponse.json(mockLesson);
+    return NextResponse.json(lessonData);
   } catch (error) {
     console.error('Error generating lesson:', error);
     
     // Log the error
     try {
       const { learningGoal } = await request.json();
-      await supabase.from('logs').insert([{
-        goal_id: learningGoal.id,
-        timestamp: new Date().toISOString(),
-        status: 'failed',
-        raw_output: error instanceof Error ? error.message : 'Unknown error'
-      }]);
+      if (learningGoal?.id) {
+        await supabase.from('logs').insert([{
+          goal_id: learningGoal.id,
+          timestamp: new Date().toISOString(),
+          status: 'failed',
+          raw_output: error instanceof Error ? error.message : 'Unknown error'
+        }]);
+      }
     } catch (logError) {
       console.error('Error logging failure:', logError);
     }

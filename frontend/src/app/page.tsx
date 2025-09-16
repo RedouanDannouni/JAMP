@@ -1,16 +1,31 @@
 'use client'
 
+import { useSession } from 'next-auth/react'
+import { redirect } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { BookOpen, Target, Brain, Users } from 'lucide-react'
 import { supabase, LearningGoal } from '@/lib/supabase'
 import LearningGoalCard from '@/components/LearningGoalCard'
 import AddGoalForm from '@/components/AddGoalForm'
+import Header from '@/components/Header'
 
 export default function Home() {
+  const { data: session, status } = useSession()
   const [goals, setGoals] = useState<LearningGoal[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    redirect('/login')
+  }
   useEffect(() => {
     fetchGoals()
   }, [])
@@ -68,26 +83,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
-                <Brain className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">AI-Platform</h1>
-                <p className="text-gray-600">Johan de Witt Scholengroep</p>
-              </div>
-            </div>
-            <nav className="flex gap-4">
-              <a href="/" className="text-blue-600 font-medium">Dashboard</a>
-              <a href="/monitoring" className="text-gray-600 hover:text-blue-600 font-medium">Monitoring</a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header user={session.user} />
 
       {/* Stats Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
