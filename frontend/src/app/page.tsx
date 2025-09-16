@@ -71,14 +71,20 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Brain className="w-8 h-8 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">AI-Platform</h1>
+                <p className="text-gray-600">Johan de Witt Scholengroep</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">AI-Platform</h1>
-              <p className="text-gray-600">Johan de Witt Scholengroep</p>
-            </div>
+            <nav className="flex gap-4">
+              <a href="/" className="text-blue-600 font-medium">Dashboard</a>
+              <a href="/monitoring" className="text-gray-600 hover:text-blue-600 font-medium">Monitoring</a>
+            </nav>
           </div>
         </div>
       </header>

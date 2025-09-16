@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
-// Mock implementation - replace with actual Azure Content Safety integration
 export async function POST(request: NextRequest) {
   try {
-    const { content } = await request.json();
+    const { content, goalId } = await request.json();
 
     // Simulate validation delay
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -21,6 +21,16 @@ export async function POST(request: NextRequest) {
     );
 
     if (foundInappropriate) {
+      // Log flagged content
+      if (goalId) {
+        await supabase.from('logs').insert([{
+          goal_id: goalId,
+          timestamp: new Date().toISOString(),
+          status: 'flagged',
+          raw_output: `Flagged content: ${foundInappropriate.join(', ')}`
+        }]);
+      }
+      
       return NextResponse.json({
         status: 'flagged',
         explanation: 'Ongepaste inhoud gedetecteerd door content filter',

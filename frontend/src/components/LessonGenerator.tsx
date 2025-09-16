@@ -62,7 +62,7 @@ const LessonGenerator: React.FC<LessonGeneratorProps> = ({ learningGoal, onClose
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content: lessonData }),
+        body: JSON.stringify({ content: lessonData, goalId: learningGoal.id }),
       });
 
       if (!validateResponse.ok) {

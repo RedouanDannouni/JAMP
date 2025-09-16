@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
-// Mock implementation - replace with actual Azure OpenAI integration
 export async function POST(request: NextRequest) {
   try {
     const { learningGoal } = await request.json();
+    const startTime = Date.now();
 
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -55,9 +56,31 @@ export async function POST(request: NextRequest) {
       ]
     };
 
+    // Log the generation
+    await supabase.from('logs').insert([{
+      goal_id: learningGoal.id,
+      timestamp: new Date().toISOString(),
+      status: 'success',
+      raw_output: JSON.stringify(mockLesson)
+    }]);
+
     return NextResponse.json(mockLesson);
   } catch (error) {
     console.error('Error generating lesson:', error);
+    
+    // Log the error
+    try {
+      const { learningGoal } = await request.json();
+      await supabase.from('logs').insert([{
+        goal_id: learningGoal.id,
+        timestamp: new Date().toISOString(),
+        status: 'failed',
+        raw_output: error instanceof Error ? error.message : 'Unknown error'
+      }]);
+    } catch (logError) {
+      console.error('Error logging failure:', logError);
+    }
+    
     return NextResponse.json(
       { error: 'Fout bij het genereren van de les' },
       { status: 500 }

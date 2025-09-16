@@ -12,3 +12,12 @@ export type LearningGoal = {
   created_at: string
   updated_at: string
 }
+
+export type LogEntry = {
+  id: string
+  goal_id: string
+  timestamp: string
+  status: 'success' | 'failed' | 'flagged'
+  raw_output: string | null
+  goal?: LearningGoal
+}
