@@ -1,0 +1,56 @@
+{
+  "dashboards": [
+    {
+      "name": "AI Platform Overview",
+      "widgets": [
+        {
+          "type": "metric",
+          "title": "Total Learning Goals",
+          "query": "learning_goals_count",
+          "visualization": "number"
+        },
+        {
+          "type": "metric",
+          "title": "API Requests (24h)",
+          "query": "api_requests_24h",
+          "visualization": "line_chart"
+        },
+        {
+          "type": "metric",
+          "title": "AI Agent Usage",
+          "query": "ai_agent_calls",
+          "visualization": "bar_chart"
+        },
+        {
+          "type": "metric",
+          "title": "Error Rate",
+          "query": "error_rate",
+          "visualization": "gauge"
+        }
+      ]
+    },
+    {
+      "name": "Learning Goals Analytics",
+      "widgets": [
+        {
+          "type": "metric",
+          "title": "Goals Created (Weekly)",
+          "query": "goals_created_weekly",
+          "visualization": "line_chart"
+        },
+        {
+          "type": "metric",
+          "title": "Most Popular Subjects",
+          "query": "popular_subjects",
+          "visualization": "pie_chart"
+        },
+        {
+          "type": "metric",
+          "title": "Validation Scores",
+          "query": "validation_scores",
+          "visualization": "histogram"
+        }
+      ]
+    }
+  ]
+}
